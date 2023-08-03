@@ -1,0 +1,23 @@
+# Ignore editor and IDE files
+.vscode/
+.idea/
+.fleet/
+
+# Ignore build artifacts
+*.o
+*.a
+*.exe
+
+# Ignore test and coverage files
+*.test
+*.out
+*.cover
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+log/
+bin/
+
+# ENV local files
+.env.local
+
