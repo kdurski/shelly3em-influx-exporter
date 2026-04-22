@@ -1,7 +1,9 @@
 # Ignore editor and IDE files
 .vscode/
 .idea/
-.fleet/
+
+# cache
+.gocache
 
 # Ignore build artifacts
 *.o
@@ -20,4 +22,3 @@ bin/
 
 # ENV local files
 .env.local
-

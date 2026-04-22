@@ -1,6 +1,6 @@
 module github.com/kdurski/shelly3em-influx-exporter
 
-go 1.20
+go 1.25
 
 require (
 	github.com/influxdata/influxdb-client-go/v2 v2.12.3

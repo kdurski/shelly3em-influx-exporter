@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if command -v asdf >/dev/null 2>&1; then
+  exec asdf exec go run ./cmd/shelly "$@"
+fi
+
+exec go run ./cmd/shelly "$@"
