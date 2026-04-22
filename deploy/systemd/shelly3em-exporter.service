@@ -1,0 +1,17 @@
+[Unit]
+Description=Import Shelly 3EM data into InfluxDB via Docker
+Wants=network-online.target
+After=network-online.target docker.service
+Requires=docker.service
+ConditionPathExists=/home/kamil/shelly3em-influx-exporter/.env.local
+
+[Service]
+Type=oneshot
+User=kamil
+WorkingDirectory=/home/kamil/shelly3em-influx-exporter
+TimeoutStartSec=30min
+ExecStartPre=/usr/bin/docker run --rm --env-file /home/kamil/shelly3em-influx-exporter/.env.local shelly:latest --check-connectivity
+ExecStart=/usr/bin/docker run --rm --env-file /home/kamil/shelly3em-influx-exporter/.env.local shelly:latest
+
+[Install]
+WantedBy=multi-user.target

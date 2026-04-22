@@ -43,3 +43,25 @@ Alternatively, you can build and run the application via Docker:
 **Note:** Do not run multiple instances of the application in parallel! Shelly3EM can only handle 1 CSV download at a time.
 
 Before starting any CSV download, the exporter performs a TCP connectivity preflight against InfluxDB and the configured Shelly host(s). This verifies that the target hosts are reachable without calling the CSV endpoints themselves.
+
+### Debian systemd timer
+
+Example `systemd` units for a Debian Docker host are provided in [`deploy/systemd/`](./deploy/systemd/). They assume:
+
+- the repository lives at `/home/kamil/shelly3em-influx-exporter`
+- the runtime configuration is `/home/kamil/shelly3em-influx-exporter/.env.local`
+- the Docker image is available locally as `shelly:latest`
+- the service should run once a day at `03:00`, with up to 10 minutes of randomized delay
+
+Install them on the host with:
+
+1. `sudo cp deploy/systemd/shelly3em-exporter.service /etc/systemd/system/`
+2. `sudo cp deploy/systemd/shelly3em-exporter.timer /etc/systemd/system/`
+3. `sudo systemctl daemon-reload`
+4. `sudo systemctl enable --now shelly3em-exporter.timer`
+5. `systemctl list-timers shelly3em-exporter.timer`
+
+Run the job manually with:
+
+- `sudo systemctl start shelly3em-exporter.service`
+- `journalctl -u shelly3em-exporter.service -n 100 --no-pager`

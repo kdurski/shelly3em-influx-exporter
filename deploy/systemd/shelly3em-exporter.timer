@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Shelly 3EM exporter daily
+
+[Timer]
+Unit=shelly3em-exporter.service
+OnCalendar=*-*-* 03:00:00
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target
