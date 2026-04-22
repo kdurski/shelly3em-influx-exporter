@@ -98,12 +98,17 @@ func downloadCsv(url string) (string, error) {
 		return "", fmt.Errorf("csv url is empty")
 	}
 
-	tempFile := os.TempDir() + "/shelly-" + randomString(10) + ".csv"
-	log.Printf("Downloading csv %s to %s\n", url, tempFile)
-	out, err := os.Create(tempFile)
+	tempDir := os.TempDir()
+	if err := os.MkdirAll(tempDir, 0o755); err != nil {
+		return "", fmt.Errorf("create temp dir %s for %s: %w", tempDir, url, err)
+	}
+
+	out, err := os.CreateTemp(tempDir, "shelly-*.csv")
 	if err != nil {
 		return "", fmt.Errorf("create temp csv for %s: %w", url, err)
 	}
+	tempFile := out.Name()
+	log.Printf("Downloading csv %s to %s\n", url, tempFile)
 
 	resp, err := downloadClient.Get(url)
 	if err != nil {

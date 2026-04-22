@@ -2,13 +2,16 @@ package main
 
 import (
 	"errors"
-	"github.com/influxdata/influxdb-client-go/v2/api"
-	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/influxdata/influxdb-client-go/v2/api"
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 )
 
 type fakeWriteAPI struct {
@@ -115,6 +118,37 @@ func TestDownloadCSVRejectsNonOKStatus(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "503 Service Unavailable") {
 		t.Fatalf("error = %q, want HTTP status", err.Error())
+	}
+}
+
+func TestDownloadCSVCreatesMissingTempDir(t *testing.T) {
+	tmpRoot := t.TempDir()
+	missingTempDir := filepath.Join(tmpRoot, "missing", "tmp")
+	t.Setenv("TMPDIR", missingTempDir)
+
+	originalClient := downloadClient
+	downloadClient = &http.Client{
+		Transport: roundTripperFunc(func(req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Status:     "200 OK",
+				Body:       io.NopCloser(strings.NewReader("timestamp,consumed,returned\n")),
+				Header:     make(http.Header),
+			}, nil
+		}),
+	}
+	t.Cleanup(func() {
+		downloadClient = originalClient
+	})
+
+	path, err := downloadCsv("http://example.invalid/emeter.csv")
+	if err != nil {
+		t.Fatalf("downloadCsv error = %v", err)
+	}
+	defer os.Remove(path)
+
+	if !strings.HasPrefix(path, missingTempDir+string(os.PathSeparator)) {
+		t.Fatalf("temp path = %q, want it under %q", path, missingTempDir)
 	}
 }
 
